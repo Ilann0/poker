@@ -3,6 +3,8 @@ from tkinter import ttk
 from hand_evaluator import cards
 from simulations import win_simulations
 
+base_folder = os.path.dirname(__file__)
+
 hand = []
 flop = []
 
@@ -172,8 +174,9 @@ buttons = []
 # Creating buttons for each card in cards frame
 for suit in suits:
     for c in range(2, 15):
+        file_path = os.path.join(base_folder, f'playing_cards/{c}_{suit}.png')
         globals()[f'image_{c}_{suit}'] = tkinter.PhotoImage(
-            file=f'playing_cards/{c}_{suit}.png')
+            file=file_path)
         globals()[f'button_{c}_{suit}'] = tkinter.Button(cards_frame, image=globals()[f'image_{c}_{suit}'],
                                                          command=lambda card=f'{c}_{suit}': press_card_button(card))
         buttons.append(globals()[f'button_{c}_{suit}'])
@@ -235,5 +238,6 @@ for l in range(4):
 
 
 root.config(menu=menubar)
-root.mainloop()
-# add menu for number of players and number of simulations to run
+
+if __name__ == '__main__':
+    root.mainloop()
