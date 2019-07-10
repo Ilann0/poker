@@ -135,7 +135,6 @@ def win_simulations(hand, flop=[], number_of_sim_to_run=10000, total_number_of_p
 
         # Evaluates level of given hand
         game_p1 = hand_level(new_flop, hand)
-        dict_hands[game_p1[0]] += 1
 
         # Evaluates level of simulated player hands
         i = 2
@@ -150,10 +149,15 @@ def win_simulations(hand, flop=[], number_of_sim_to_run=10000, total_number_of_p
         # Evaluting simulated player hands against given hand
         for game in games:
             game_hand_level = game[0]
+            dict_hands[game_hand_level] += 1
             # Check higher for hand_level
             if p1_hand_level > game_hand_level:
                 won += 1
                 continue
+
+            # elif p1_hand_level < game_hand_level:
+                # dict_hands[game_hand_level] += 1
+                # continue
 
             # If they are equal, start looking for high cards and stuff
             elif p1_hand_level == game_hand_level:
@@ -163,11 +167,14 @@ def win_simulations(hand, flop=[], number_of_sim_to_run=10000, total_number_of_p
                     won += 1
                     continue
 
-                # Sraight, Quads and Straight Flush
+                # Sraight and Straight Flush
                 elif p1_hand_level in (4, 7, 8):
                     if game_p1[1] >= game[1]:
                         won += 1
                         continue
+                    # else:
+                        # dict_hands[game_hand_level] += 1
+                        # continue
 
                 # No hand, Flush and Full House
                 elif p1_hand_level in (0, 5, 6):
@@ -175,28 +182,32 @@ def win_simulations(hand, flop=[], number_of_sim_to_run=10000, total_number_of_p
                         if game_p1[1][i] >= game[1][i]:
                             won += 1
                             break
+                        # else:
+                            # dict_hands[game_hand_level] += 1
+                            # break
                     continue
 
                 # Two Pairs
                 elif p1_hand_level == 2:
-                    flag = False
                     for i in range(len(game_p1[1])):
                         # Check if pairs are higher
-                        if game_p1[1][i] >= game[1][i]:
+                        if game_p1[1][i] > game[1][i]:
                             won += 1
-                            flag = True
                             break
-                    if not flag:
-                        # Check for high cards
-                        if game_p1[2] >= game[2]:
-                            won += 1
-                            continue
+                        # If not, check for high card
+                        elif game_p1[1][i] == game[1][i]:
+                            if game_p1[2] >= game[2]:
+                                won += 1
+                                break
+                        # else:
+                            # dict_hands[game_hand_level] += 1
+                            # break
                     continue
 
-                # One Pair and Three of a Kind
-                elif p1_hand_level in (1, 3):
-                    # Check if pair or trips are higher
-                    if game_p1[1] >= game[1]:
+                # One Pair, Three of a Kind and Quads
+                elif p1_hand_level in (1, 3, 7):
+                        # Check if pair or trips are higher
+                    if game_p1[1] > game[1]:
                         won += 1
                         continue
 
@@ -205,10 +216,16 @@ def win_simulations(hand, flop=[], number_of_sim_to_run=10000, total_number_of_p
                         for i in range(len(game_p1[2])):
                             if game_p1[2][i] >= game[2][i]:
                                 won += 1
-                                continue
+                                break
+                            # else:
+                                # dict_hands[game_hand_level] += 1
+                                # break
+                    # else:
+                        # dict_hands[game_hand_level] += 1
+                    continue
+
                 else:
-                    print(
-                        'Something went wrong with hand, flop, hand_level: ', hand, flop, game_p1)
+                    print('Something went wrong with hand, flop, hand_level: ', hand, flop, game_p1)
 
             # If won is equal to the number of players, then every player was beat
             # and the given hand won the game
@@ -233,15 +250,15 @@ def win_simulations(hand, flop=[], number_of_sim_to_run=10000, total_number_of_p
                       'Straight Flush': round((dict_won_hands[8]/number_of_sim_to_run)*100, 6),
                       'Royal Flush': round((dict_won_hands[9]/number_of_sim_to_run)*100, 6)}
 
-    general_stats_dict = {'High Card': round((dict_hands[0]/number_of_sim_to_run)*100, 6),
-                          'One Pair': round((dict_hands[1]/number_of_sim_to_run)*100, 6),
-                          'Two Pairs': round((dict_hands[2]/number_of_sim_to_run)*100, 6),
-                          'Three of a Kind': round((dict_hands[3]/number_of_sim_to_run)*100, 6),
-                          'Straight': round((dict_hands[4]/number_of_sim_to_run)*100, 6),
-                          'Flush': round((dict_hands[5]/number_of_sim_to_run)*100, 6),
-                          'Full House': round((dict_hands[6]/number_of_sim_to_run)*100, 6),
-                          'Quads': round((dict_hands[7]/number_of_sim_to_run)*100, 6),
-                          'Straight Flush': round((dict_hands[8]/number_of_sim_to_run)*100, 6),
-                          'Royal Flush': round((dict_hands[9]/number_of_sim_to_run)*100, 6)}
+    general_stats_dict = {'High Card': round(((dict_hands[0]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'One Pair': round(((dict_hands[1]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Two Pairs': round(((dict_hands[2]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Three of a Kind': round(((dict_hands[3]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Straight': round(((dict_hands[4]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Flush': round(((dict_hands[5]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Full House': round(((dict_hands[6]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Quads': round(((dict_hands[7]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Straight Flush': round(((dict_hands[8]/total_number_of_players)/(number_of_sim_to_run))*100, 6),
+                          'Royal Flush': round(((dict_hands[9]/total_number_of_players)/(number_of_sim_to_run))*100, 6)}
 
     return won_stats_dict, general_stats_dict

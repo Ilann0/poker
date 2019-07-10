@@ -37,7 +37,7 @@ def hand_level(flop, hand):
 
     high_card = sorted(all_cards, reverse=True)[:5]
     pair_cards = []
-    three_of_a_kind_card = None
+    three_of_a_kind_cards = []
     straight_high_card = None
     flush_level = None
     flush_level_check_straight_flush = None
@@ -53,13 +53,9 @@ def hand_level(flop, hand):
             quad_card = card
 
         # Three of a Kind
-        elif card_count == 3 and card != three_of_a_kind_card:
+        elif card_count == 3 and card not in three_of_a_kind_cards:
             three_of_a_kind = True
-            if three_of_a_kind_card:
-                if card > three_of_a_kind_card:
-                    three_of_a_kind_card = card
-            else:
-                three_of_a_kind_card = card
+            three_of_a_kind_cards.append(card)
 
         # Pair and Two Pairs
         elif card_count == 2 and card not in pair_cards:
@@ -74,7 +70,7 @@ def hand_level(flop, hand):
         if all_suits.count(suit) >= 5:
             flush = True
             flush_level_check_straight_flush = sorted(
-                [cards_value[card] for (card, suit) in all if suit == suit], reverse=True)
+                [cards_value[card] for (card, s) in all if s == suit], reverse=True)
             flush_level = flush_level_check_straight_flush[:5]
 
     # Straight, Straight Flush and Royal Flush
@@ -97,10 +93,17 @@ def hand_level(flop, hand):
                     royal_flush = True
 
     # Full house
+    # Three of a kind with a pair
     if three_of_a_kind and pair:
         full_house = True
-        full_house_cards.append(three_of_a_kind_card)
+        full_house_cards.append(max(three_of_a_kind_cards))
         full_house_cards.append(max(pair_cards))
+
+    # 2 three of a kind make a full house
+    elif len(three_of_a_kind_cards) >= 2:
+        full_house = True
+        full_house_cards.append(max(three_of_a_kind_cards))
+        full_house_cards.append(min(three_of_a_kind_cards))
 
     hand_level = 0
 
@@ -113,8 +116,8 @@ def hand_level(flop, hand):
         return (hand_level, straight_high_card)
     elif quads:
         hand_level = 7
-        high_card = max(card for card in all_cards if card != quad_card)
-        return (hand_level, high_card)
+        high_card = [max(card for card in all_cards if card != quad_card)]
+        return (hand_level, quad_card, high_card)
     elif full_house:
         hand_level = 6
         return (hand_level, full_house_cards)
@@ -126,9 +129,9 @@ def hand_level(flop, hand):
         return (hand_level, straight_high_card)
     elif three_of_a_kind:
         hand_level = 3
-        n_all_cards = [card for card in all_cards if card != three_of_a_kind_card]
+        n_all_cards = [card for card in all_cards if card not in three_of_a_kind_cards]
         highest_cards = sorted(n_all_cards, reverse=True)[:2]
-        return (hand_level, three_of_a_kind_card, highest_cards)
+        return (hand_level, max(three_of_a_kind_cards), highest_cards)
     elif two_pairs:
         hand_level = 2
         n_all_cards = [card for card in all_cards if card not in pair_cards]
